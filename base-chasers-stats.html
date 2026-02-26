@@ -417,11 +417,17 @@
   <div class="panel">
     <div class="panel-header" onclick="togglePanel(this)">👧 Add Player Game Stats <span class="toggle-icon">▼</span></div>
     <div class="panel-body">
+      <div id="ps-no-games-msg" style="display:none;background:#fff3cd;border:2px solid var(--gold-dark);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-family:'Oswald',sans-serif;letter-spacing:1px;color:var(--blue-dark);">
+        ⚠️ No game results logged yet. Please log a Team Game Result first.
+      </div>
       <div class="form-row">
-        <div class="form-group"><label>Game #</label><input type="number" id="ps-gamenum" min="1" placeholder="e.g. 1"></div>
+        <div class="form-group">
+          <label>Game #</label>
+          <select id="ps-gamenum" onchange="onGameSelect()"><option value="">-- Select Game --</option></select>
+        </div>
         <div class="form-group"><label>Player</label><select id="ps-player"></select></div>
-        <div class="form-group"><label>Date</label><input type="date" id="ps-date"></div>
-        <div class="form-group"><label>Opponent</label><input type="text" id="ps-opp" placeholder="vs. Team"></div>
+        <div class="form-group"><label>Date</label><input type="text" id="ps-date" readonly style="background:#e8e8e8;color:#555;"></div>
+        <div class="form-group"><label>Opponent</label><input type="text" id="ps-opp" readonly style="background:#e8e8e8;color:#555;"></div>
       </div>
 
       <div class="form-divider">🏏 Batting Stats</div>
@@ -701,6 +707,7 @@ window.renderAll = function(){
 }
 
 function populateSelects(){
+  // Player dropdowns
   ['ps-player','gr-potg'].forEach(id=>{
     const el=document.getElementById(id); if(!el) return;
     const cur=id==='ps-player'?el.value:'';
@@ -714,6 +721,33 @@ function populateSelects(){
     });
     if(cur) el.value=cur;
   });
+
+  // Game # dropdown for player stats
+  const gsel=document.getElementById('ps-gamenum');
+  const curGame=gsel.value;
+  gsel.innerHTML='<option value="">-- Select Game --</option>';
+  [...gameResults].sort((a,b)=>a.gameNum-b.gameNum).forEach(g=>{
+    const res=g.us>g.them?'W':(g.us<g.them?'L':'T');
+    const o=document.createElement('option');
+    o.value=g.gameNum;
+    o.textContent=`Game ${g.gameNum} — ${g.date} vs ${g.opp} (${res} ${g.us}-${g.them})`;
+    gsel.appendChild(o);
+  });
+  if(curGame) gsel.value=curGame;
+
+  // Show/hide no-games warning
+  const msg=document.getElementById('ps-no-games-msg');
+  if(msg) msg.style.display=gameResults.length===0?'block':'none';
+
+  // Auto-fill date/opp based on selected game
+  onGameSelect();
+}
+window.onGameSelect = function(){
+  const gsel=document.getElementById('ps-gamenum');
+  const num=parseInt(gsel.value);
+  const g=gameResults.find(x=>x.gameNum===num);
+  document.getElementById('ps-date').value = g ? g.date : '';
+  document.getElementById('ps-opp').value  = g ? g.opp  : '';
 }
 
 // ── TEAM STATS ────────────────────────────────────────────────────────────
@@ -1030,18 +1064,14 @@ window.delResult = async function(docId){
 window.addPlayerStats = async function(){
   const gameNum=parseInt(document.getElementById('ps-gamenum').value);
   const pid=parseInt(document.getElementById('ps-player').value);
-  if(!gameNum){ alert('Please enter a Game #.'); return; }
+  if(!gameNum){ alert('Please select a Game from the dropdown.'); return; }
   if(!pid){ alert('Please select a player.'); return; }
-
-  // Require a matching game result to exist
-  const matchingGame = gameResults.find(g=>g.gameNum===gameNum);
-  if(!matchingGame){ alert(`Game #${gameNum} does not exist yet. Please log the Team Game Result for Game #${gameNum} first before adding player stats.`); return; }
-
   if(playerStats.find(g=>g.gameNum===gameNum&&g.pid===pid)){
     alert(`Stats for this player in Game #${gameNum} already exist. Delete them first to replace.`); return;
   }
-  const date=document.getElementById('ps-date').value||today();
-  const opp=document.getElementById('ps-opp').value||'Unknown';
+  const g=gameResults.find(x=>x.gameNum===gameNum);
+  const date=g?g.date:today();
+  const opp=g?g.opp:'Unknown';
   const rec={
     gameNum, pid, date, opp,
     // batting
@@ -1069,9 +1099,12 @@ window.addPlayerStats = async function(){
   setSync('syncing','Saving...');
   try{
     await addDoc(collection(db,'player_stats'), rec);
-    ['ps-opp','ps-pos'].forEach(id=>document.getElementById(id).value='');
-    ['ps-gamenum','ps-ab','ps-r','ps-h','ps-2b','ps-3b','ps-hr','ps-rbi','ps-bb','ps-so','ps-sb','ps-po','ps-a','ps-ip','ps-er','ps-ph','ps-pbb','ps-pk'].forEach(id=>document.getElementById(id).value=0);
+    ['ps-pos'].forEach(id=>document.getElementById(id).value='');
+    ['ps-ab','ps-r','ps-h','ps-2b','ps-3b','ps-hr','ps-rbi','ps-bb','ps-so','ps-sb','ps-po','ps-a','ps-ip','ps-er','ps-ph','ps-pbb','ps-pk'].forEach(id=>document.getElementById(id).value=0);
     document.getElementById('ps-player').value='';
+    document.getElementById('ps-gamenum').value='';
+    document.getElementById('ps-date').value='';
+    document.getElementById('ps-opp').value='';
     setSync('connected','Live — synced across all devices');
     alert(`Stats saved for Game #${gameNum}!`);
   }catch(e){setSync('error','Save failed');alert('Error: '+e.message);}
@@ -1301,7 +1334,6 @@ window.togglePanel=function(h){h.classList.toggle('collapsed');h.nextElementSibl
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 document.getElementById('gr-date').value=today();
-document.getElementById('ps-date').value=today();
 </script>
 </body>
 </html>
