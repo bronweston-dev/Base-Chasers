@@ -183,6 +183,18 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   .loading-text{font-family:'Oswald',sans-serif;color:var(--gold);letter-spacing:3px;font-size:1rem;}
 
+  .edit-row{cursor:pointer;color:var(--blue);font-size:.8rem;font-family:'Oswald',sans-serif;letter-spacing:1px;background:var(--gray-light);border:1px solid var(--gray);border-radius:4px;padding:2px 7px;margin-right:4px;}
+  .edit-row:hover{background:var(--blue);color:white;}
+
+  /* EDIT MODAL */
+  .edit-modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,26,58,0.88);z-index:3000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+  .edit-modal-overlay.active{display:flex;}
+  .edit-modal{background:white;border-radius:14px;max-width:780px;width:95vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:slideUp .22s ease;}
+  .edit-modal-header{background:linear-gradient(135deg,var(--blue-dark),var(--blue));padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--gold);border-radius:14px 14px 0 0;}
+  .edit-modal-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);letter-spacing:2px;}
+  .edit-modal-body{padding:20px 22px;}
+  .edit-btn-row{display:flex;gap:10px;margin-top:16px;}
+
   .footer{text-align:center;padding:20px;color:rgba(200,212,232,0.4);font-size:.75rem;letter-spacing:2px;}
   @media(max-width:600px){.header-logo{height:80px}.header-text h1{font-size:2rem}.header-season{display:none}.main-nav{overflow-x:auto}}
 
@@ -493,11 +505,111 @@
   </div>
 </div>
 
+<!-- EDIT GAME RESULT MODAL -->
+<div class="edit-modal-overlay" id="editResultModal" onclick="closeEditResultOnBg(event)">
+  <div class="edit-modal">
+    <div class="edit-modal-header">
+      <h3 id="editResultTitle">Edit Game Result</h3>
+      <button class="modal-close" onclick="closeEditResult()">✕</button>
+    </div>
+    <div class="edit-modal-body">
+      <input type="hidden" id="er-docid">
+      <div class="form-row">
+        <div class="form-group"><label>Game #</label><input type="number" id="er-num" min="1" readonly style="background:#e8e8e8;"></div>
+        <div class="form-group"><label>Date</label><input type="date" id="er-date"></div>
+        <div class="form-group"><label>Opponent</label><input type="text" id="er-opp"></div>
+        <div class="form-group"><label>Our Score</label><input type="number" id="er-us" min="0"></div>
+        <div class="form-group"><label>Their Score</label><input type="number" id="er-them" min="0"></div>
+      </div>
+      <div class="form-divider">Our Runs by Inning</div>
+      <div class="inning-grid">
+        <div class="inning-box"><label>Inn 1</label><input type="number" id="er-i1" min="0"></div>
+        <div class="inning-box"><label>Inn 2</label><input type="number" id="er-i2" min="0"></div>
+        <div class="inning-box"><label>Inn 3</label><input type="number" id="er-i3" min="0"></div>
+        <div class="inning-box"><label>Inn 4</label><input type="number" id="er-i4" min="0"></div>
+        <div class="inning-box"><label>Extra</label><input type="number" id="er-i5" min="0"></div>
+      </div>
+      <div class="form-divider">Opponent Runs by Inning</div>
+      <div class="inning-grid">
+        <div class="inning-box"><label>Inn 1</label><input type="number" id="er-o1" min="0"></div>
+        <div class="inning-box"><label>Inn 2</label><input type="number" id="er-o2" min="0"></div>
+        <div class="inning-box"><label>Inn 3</label><input type="number" id="er-o3" min="0"></div>
+        <div class="inning-box"><label>Inn 4</label><input type="number" id="er-o4" min="0"></div>
+        <div class="inning-box"><label>Extra</label><input type="number" id="er-o5" min="0"></div>
+      </div>
+      <div class="form-divider">⭐ Player of the Game</div>
+      <div class="form-row">
+        <div class="form-group" style="grid-column:span 3">
+          <label>Player(s) — hold Ctrl/Cmd for multiple</label>
+          <select id="er-potg" multiple style="height:80px;background:white;"></select>
+        </div>
+        <div class="form-group" style="grid-column:span 3">
+          <label>Why she was special</label>
+          <textarea id="er-desc" rows="2" style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:'Roboto Condensed',sans-serif;font-size:.92rem;resize:vertical;background:var(--gray-light);"></textarea>
+        </div>
+      </div>
+      <div class="edit-btn-row">
+        <button class="btn btn-primary" onclick="saveEditResult()">💾 Save Changes</button>
+        <button class="btn btn-secondary" onclick="closeEditResult()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PLAYER STATS MODAL -->
+<div class="edit-modal-overlay" id="editPlayerModal" onclick="closeEditPlayerOnBg(event)">
+  <div class="edit-modal">
+    <div class="edit-modal-header">
+      <h3 id="editPlayerTitle">Edit Player Stats</h3>
+      <button class="modal-close" onclick="closeEditPlayer()">✕</button>
+    </div>
+    <div class="edit-modal-body">
+      <input type="hidden" id="ep-docid">
+      <div class="form-row">
+        <div class="form-group"><label>Game #</label><input type="number" id="ep-gamenum" readonly style="background:#e8e8e8;"></div>
+        <div class="form-group"><label>Date</label><input type="date" id="ep-date"></div>
+        <div class="form-group"><label>Opponent</label><input type="text" id="ep-opp"></div>
+      </div>
+      <div class="form-divider">🏏 Batting</div>
+      <div class="form-row">
+        <div class="form-group"><label>AB</label><input type="number" id="ep-ab" min="0"></div>
+        <div class="form-group"><label>R</label><input type="number" id="ep-r" min="0"></div>
+        <div class="form-group"><label>H</label><input type="number" id="ep-h" min="0"></div>
+        <div class="form-group"><label>2B</label><input type="number" id="ep-2b" min="0"></div>
+        <div class="form-group"><label>3B</label><input type="number" id="ep-3b" min="0"></div>
+        <div class="form-group"><label>HR</label><input type="number" id="ep-hr" min="0"></div>
+        <div class="form-group"><label>RBI</label><input type="number" id="ep-rbi" min="0"></div>
+        <div class="form-group"><label>BB</label><input type="number" id="ep-bb" min="0"></div>
+        <div class="form-group"><label>SO</label><input type="number" id="ep-so" min="0"></div>
+        <div class="form-group"><label>SB</label><input type="number" id="ep-sb" min="0"></div>
+      </div>
+      <div class="form-divider">🧤 Fielding</div>
+      <div class="form-row">
+        <div class="form-group"><label>Position</label><input type="text" id="ep-pos"></div>
+        <div class="form-group"><label>PO</label><input type="number" id="ep-po" min="0"></div>
+        <div class="form-group"><label>A</label><input type="number" id="ep-a" min="0"></div>
+      </div>
+      <div class="form-divider">⚾ Pitching</div>
+      <div class="form-row">
+        <div class="form-group"><label>IP</label><input type="number" id="ep-ip" min="0" step="0.1"></div>
+        <div class="form-group"><label>ER</label><input type="number" id="ep-er" min="0"></div>
+        <div class="form-group"><label>H Allowed</label><input type="number" id="ep-ph" min="0"></div>
+        <div class="form-group"><label>BB Allowed</label><input type="number" id="ep-pbb" min="0"></div>
+        <div class="form-group"><label>K</label><input type="number" id="ep-pk" min="0"></div>
+      </div>
+      <div class="edit-btn-row">
+        <button class="btn btn-primary" onclick="saveEditPlayer()">💾 Save Changes</button>
+        <button class="btn btn-secondary" onclick="closeEditPlayer()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="footer">BASE CHASERS · OAK HILL 6U SOFTBALL · 2026</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA3SRGasiAgMT8lt88RSbu4GawDpGS6HDg",
@@ -662,7 +774,10 @@ function renderTeamStats(){
       <td>${inn[0]}</td><td>${inn[1]}</td><td>${inn[2]}</td><td>${inn[3]}</td>
       <td>${g.us}</td><td>${g.them}</td>
       ${potgCell}
-      <td><span class="delete-row" onclick="event.stopPropagation();delResult('${g._id}')">🗑</span></td>`;
+      <td>
+        <button class="edit-row" onclick="event.stopPropagation();openEditResult('${g._id}')">✏️ Edit</button>
+        <span class="delete-row" onclick="event.stopPropagation();delResult('${g._id}')">🗑</span>
+      </td>`;
     body.appendChild(tr);
   });
   document.getElementById('noResults').style.display=sorted.length?'none':'block';
@@ -894,10 +1009,21 @@ window.addGameResult = async function(){
 }
 
 window.delResult = async function(docId){
-  if(!confirm('Delete this game result?')) return;
+  const g = gameResults.find(x=>x._id===docId);
+  if(!g) return;
+  const associated = playerStats.filter(x=>x.gameNum===g.gameNum);
+  const msg = associated.length
+    ? `Delete Game #${g.gameNum} AND all ${associated.length} player stat entries for this game?`
+    : `Delete Game #${g.gameNum}?`;
+  if(!confirm(msg)) return;
   setSync('syncing','Deleting...');
-  try{ await deleteDoc(doc(db,'game_results',docId)); setSync('connected','Live — synced'); }
-  catch(e){setSync('error','Delete failed');}
+  try{
+    // Delete all associated player stats first
+    await Promise.all(associated.map(x=>deleteDoc(doc(db,'player_stats',x._id))));
+    // Then delete the game result
+    await deleteDoc(doc(db,'game_results',docId));
+    setSync('connected','Live — synced');
+  }catch(e){setSync('error','Delete failed');alert('Error: '+e.message);}
 }
 
 // ── ADD PLAYER STATS ──────────────────────────────────────────────────────
@@ -906,6 +1032,11 @@ window.addPlayerStats = async function(){
   const pid=parseInt(document.getElementById('ps-player').value);
   if(!gameNum){ alert('Please enter a Game #.'); return; }
   if(!pid){ alert('Please select a player.'); return; }
+
+  // Require a matching game result to exist
+  const matchingGame = gameResults.find(g=>g.gameNum===gameNum);
+  if(!matchingGame){ alert(`Game #${gameNum} does not exist yet. Please log the Team Game Result for Game #${gameNum} first before adding player stats.`); return; }
+
   if(playerStats.find(g=>g.gameNum===gameNum&&g.pid===pid)){
     alert(`Stats for this player in Game #${gameNum} already exist. Delete them first to replace.`); return;
   }
@@ -953,6 +1084,105 @@ window.delPlayerStat = async function(docId){
   catch(e){setSync('error','Delete failed');}
 }
 
+// ── EDIT GAME RESULT ──────────────────────────────────────────────────────
+window.openEditResult = function(docId){
+  const g = gameResults.find(x=>x._id===docId);
+  if(!g) return;
+
+  // Populate POTG select if empty
+  const potgSel=document.getElementById('er-potg');
+  if(potgSel.options.length===0){
+    PLAYERS.forEach(p=>{ const o=document.createElement('option'); o.value=p.id; o.textContent=`#${p.num} ${p.first}`; potgSel.appendChild(o); });
+  }
+
+  document.getElementById('er-docid').value = docId;
+  document.getElementById('editResultTitle').textContent = `Edit Game ${g.gameNum} — vs ${g.opp}`;
+  document.getElementById('er-num').value   = g.gameNum;
+  document.getElementById('er-date').value  = g.date;
+  document.getElementById('er-opp').value   = g.opp;
+  document.getElementById('er-us').value    = g.us;
+  document.getElementById('er-them').value  = g.them;
+  const inn    = g.innings    || [0,0,0,0,0];
+  const oppInn = g.oppInnings || [0,0,0,0,0];
+  [1,2,3,4,5].forEach(i=>{ document.getElementById(`er-i${i}`).value=inn[i-1]||0; document.getElementById(`er-o${i}`).value=oppInn[i-1]||0; });
+  document.getElementById('er-desc').value = g.potgDesc||'';
+  Array.from(potgSel.options).forEach(o=>{ o.selected=(g.potgIds||[]).includes(parseInt(o.value)); });
+
+  document.getElementById('editResultModal').classList.add('active');
+}
+
+window.saveEditResult = async function(){
+  const docId   = document.getElementById('er-docid').value;
+  const date    = document.getElementById('er-date').value;
+  const opp     = document.getElementById('er-opp').value||'Unknown';
+  const us      = +document.getElementById('er-us').value||0;
+  const them    = +document.getElementById('er-them').value||0;
+  const innings    = [1,2,3,4,5].map(i=>+document.getElementById(`er-i${i}`).value||0);
+  const oppInnings = [1,2,3,4,5].map(i=>+document.getElementById(`er-o${i}`).value||0);
+  const potgIds = Array.from(document.getElementById('er-potg').selectedOptions).map(o=>parseInt(o.value));
+  const potgDesc= document.getElementById('er-desc').value.trim();
+  setSync('syncing','Saving...');
+  try{
+    await updateDoc(doc(db,'game_results',docId),{date,opp,us,them,innings,oppInnings,potgIds,potgDesc});
+    setSync('connected','Live — synced across all devices');
+    closeEditResult();
+  }catch(e){setSync('error','Save failed');alert('Error: '+e.message);}
+}
+
+window.closeEditResult   = ()=>document.getElementById('editResultModal').classList.remove('active');
+window.closeEditResultOnBg = e=>{ if(e.target===document.getElementById('editResultModal')) closeEditResult(); };
+
+// ── EDIT PLAYER STATS ─────────────────────────────────────────────────────
+window.openEditPlayer = function(docId){
+  const g = playerStats.find(x=>x._id===docId);
+  if(!g) return;
+  const p = PLAYERS.find(x=>x.id===g.pid);
+  document.getElementById('ep-docid').value  = docId;
+  document.getElementById('editPlayerTitle').textContent = `Edit G${g.gameNum} — ${p?p.first:'Player'}`;
+  document.getElementById('ep-gamenum').value = g.gameNum;
+  document.getElementById('ep-date').value    = g.date;
+  document.getElementById('ep-opp').value     = g.opp;
+  document.getElementById('ep-ab').value  = g.ab;  document.getElementById('ep-r').value   = g.r;
+  document.getElementById('ep-h').value   = g.h;   document.getElementById('ep-2b').value  = g.d;
+  document.getElementById('ep-3b').value  = g.t;   document.getElementById('ep-hr').value  = g.hr;
+  document.getElementById('ep-rbi').value = g.rbi; document.getElementById('ep-bb').value  = g.bb;
+  document.getElementById('ep-so').value  = g.so;  document.getElementById('ep-sb').value  = g.sb;
+  document.getElementById('ep-pos').value = g.pos||'';
+  document.getElementById('ep-po').value  = g.po;  document.getElementById('ep-a').value   = g.a;
+  document.getElementById('ep-ip').value  = g.ip;  document.getElementById('ep-er').value  = g.er;
+  document.getElementById('ep-ph').value  = g.ph;  document.getElementById('ep-pbb').value = g.pbb;
+  document.getElementById('ep-pk').value  = g.pk;
+  document.getElementById('editPlayerModal').classList.add('active');
+}
+
+window.saveEditPlayer = async function(){
+  const docId = document.getElementById('ep-docid').value;
+  const date  = document.getElementById('ep-date').value;
+  const opp   = document.getElementById('ep-opp').value||'Unknown';
+  const rec = {
+    date, opp,
+    ab:+document.getElementById('ep-ab').value||0,  r:+document.getElementById('ep-r').value||0,
+    h: +document.getElementById('ep-h').value||0,   d:+document.getElementById('ep-2b').value||0,
+    t: +document.getElementById('ep-3b').value||0,  hr:+document.getElementById('ep-hr').value||0,
+    rbi:+document.getElementById('ep-rbi').value||0,bb:+document.getElementById('ep-bb').value||0,
+    so:+document.getElementById('ep-so').value||0,  sb:+document.getElementById('ep-sb').value||0,
+    pos:document.getElementById('ep-pos').value||'—',
+    po:+document.getElementById('ep-po').value||0,  a:+document.getElementById('ep-a').value||0,
+    ip:+document.getElementById('ep-ip').value||0,  er:+document.getElementById('ep-er').value||0,
+    ph:+document.getElementById('ep-ph').value||0,  pbb:+document.getElementById('ep-pbb').value||0,
+    pk:+document.getElementById('ep-pk').value||0,
+  };
+  setSync('syncing','Saving...');
+  try{
+    await updateDoc(doc(db,'player_stats',docId),rec);
+    setSync('connected','Live — synced across all devices');
+    closeEditPlayer();
+  }catch(e){setSync('error','Save failed');alert('Error: '+e.message);}
+}
+
+window.closeEditPlayer    = ()=>document.getElementById('editPlayerModal').classList.remove('active');
+window.closeEditPlayerOnBg = e=>{ if(e.target===document.getElementById('editPlayerModal')) closeEditPlayer(); };
+
 // ── PLAYER MODAL ──────────────────────────────────────────────────────────
 window.openModal = function(pid, tab='mb'){
   activePlayer=pid;
@@ -993,7 +1223,10 @@ function renderModal(pid){
       <td>${g.ab}</td><td>${g.r}</td><td>${g.h}</td><td>${g.d}</td><td>${g.t}</td><td>${g.hr}</td>
       <td>${g.rbi}</td><td>${g.bb}</td><td>${g.so}</td><td>${g.sb}</td><td>${avg}</td>
       <td>${potg?`<button class="potg-badge" onclick="showBoxScore(${g.gameNum})">⭐</button>`:''}</td>
-      <td><span class="delete-row" onclick="delPlayerStat('${g._id}')">🗑</span></td>`;
+      <td>
+        <button class="edit-row" onclick="openEditPlayer('${g._id}')">✏️</button>
+        <span class="delete-row" onclick="delPlayerStat('${g._id}')">🗑</span>
+      </td>`;
     bBody.appendChild(tr);
   });
   document.getElementById('mNoBat').style.display=gs.length?'none':'block';
@@ -1004,7 +1237,10 @@ function renderModal(pid){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><strong>G${g.gameNum}</strong></td><td>${g.date}·${g.opp}</td>
       <td>${g.pos||'—'}</td><td>${g.po}</td><td>${g.a}</td><td>${g.po+g.a}</td>
-      <td><span class="delete-row" onclick="delPlayerStat('${g._id}')">🗑</span></td>`;
+      <td>
+        <button class="edit-row" onclick="openEditPlayer('${g._id}')">✏️</button>
+        <span class="delete-row" onclick="delPlayerStat('${g._id}')">🗑</span>
+      </td>`;
     fBody.appendChild(tr);
   });
   document.getElementById('mNoFld').style.display=gs.length?'none':'block';
@@ -1017,7 +1253,10 @@ function renderModal(pid){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><strong>G${g.gameNum}</strong></td><td>${g.date}·${g.opp}</td>
       <td>${g.ip.toFixed(1)}</td><td>${g.er}</td><td>${g.ph}</td><td>${g.pbb}</td><td>${g.pk}</td><td>${era}</td>
-      <td><span class="delete-row" onclick="delPlayerStat('${g._id}')">🗑</span></td>`;
+      <td>
+        <button class="edit-row" onclick="openEditPlayer('${g._id}')">✏️</button>
+        <span class="delete-row" onclick="delPlayerStat('${g._id}')">🗑</span>
+      </td>`;
     pBody.appendChild(tr);
   });
   document.getElementById('mNoPit').style.display=pitched.length?'none':'block';
