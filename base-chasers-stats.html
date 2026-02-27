@@ -335,7 +335,7 @@
         <span class="legend-item"><strong>G</strong>Games</span><span class="legend-item"><strong>IP</strong>Innings</span>
         <span class="legend-item"><strong>ER</strong>Earned Runs</span><span class="legend-item"><strong>H</strong>Hits Allowed</span>
         <span class="legend-item"><strong>BB</strong>Walks</span><span class="legend-item"><strong>K</strong>Strikeouts</span>
-        <span class="legend-item"><strong>ERA</strong>ERA (per 7 inn)</span>
+        <span class="legend-item"><strong>ERA</strong>ERA (per 4 inn)</span>
       </div>
       <div class="table-wrap"><table><thead><tr>
         <th class="name-col" onclick="sortPlayers('pit','name')">Player ⇅</th>
@@ -401,9 +401,12 @@
       <div class="form-row">
         <div class="form-group" style="grid-column:span 3">
           <label>Player(s) — hold Ctrl/Cmd to select multiple</label>
-          <select id="gr-potg" multiple style="height:85px;background:white;" onchange="renderPotgDescs('gr-potg','gr-descs')"></select>
+          <select id="gr-potg" multiple style="height:85px;background:white;"></select>
         </div>
-        <div style="grid-column:span 3" id="gr-descs"></div>
+        <div class="form-group" style="grid-column:span 3">
+          <label>Why she was special</label>
+          <textarea id="gr-desc" rows="2" placeholder="Describe what made her shine..." style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:'Roboto Condensed',sans-serif;font-size:.92rem;resize:vertical;background:var(--gray-light);"></textarea>
+        </div>
       </div>
       <button class="btn btn-primary" onclick="addGameResult()">+ Save Game Result</button>
     </div>
@@ -544,9 +547,12 @@
       <div class="form-row">
         <div class="form-group" style="grid-column:span 3">
           <label>Player(s) — hold Ctrl/Cmd for multiple</label>
-          <select id="er-potg" multiple style="height:80px;background:white;" onchange="renderPotgDescs('er-potg','er-descs')"></select>
+          <select id="er-potg" multiple style="height:80px;background:white;"></select>
         </div>
-        <div style="grid-column:span 3" id="er-descs"></div>
+        <div class="form-group" style="grid-column:span 3">
+          <label>Why she was special</label>
+          <textarea id="er-desc" rows="2" style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:'Roboto Condensed',sans-serif;font-size:.92rem;resize:vertical;background:var(--gray-light);"></textarea>
+        </div>
       </div>
       <div class="edit-btn-row">
         <button class="btn btn-primary" onclick="saveEditResult()">💾 Save Changes</button>
@@ -688,7 +694,7 @@ function pStats(pid){
   const gs=playerStats.filter(g=>g.pid===pid&&g.ip>0);
   const s={g:gs.length,ip:0,er:0,ph:0,pbb:0,pk:0};
   gs.forEach(g=>{s.ip+=g.ip;s.er+=g.er;s.ph+=g.ph;s.pbb+=g.pbb;s.pk+=g.pk;});
-  s.era=s.ip>0?(s.er/s.ip)*7:null; return s;
+  s.era=s.ip>0?(s.er/s.ip)*4:null; return s;
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────
@@ -940,7 +946,7 @@ window.showBoxScore = function(num){
   const pitchers=lineup.filter(p=>{ const gs=gPlayers.find(x=>x.pid===p.id); return gs&&gs.ip>0; });
   const pitRows=pitchers.map(p=>{
     const gs=gPlayers.find(x=>x.pid===p.id);
-    const era=gs.ip>0?f2((gs.er/gs.ip)*7):'—';
+    const era=gs.ip>0?f2((gs.er/gs.ip)*4):'—';
     return `<tr>
       <td><span class="player-num">${p.num}</span>${p.first}</td>
       <td>${gs.ip.toFixed(1)}</td><td>${gs.er}</td><td>${gs.ph}</td>
@@ -950,16 +956,11 @@ window.showBoxScore = function(num){
 
   // POTG section
   const potgNames=(g.potgIds||[]).map(id=>pName(id));
-  const potgDescs=g.potgDescs||{};
   const potgSection=potgNames.length?`
     <div class="potg-section">
       <div class="potg-title">⭐ Player of the Game</div>
       <div class="potg-chips">${potgNames.map(n=>`<div class="potg-chip">⭐ ${n}</div>`).join('')}</div>
-      ${(g.potgIds||[]).map(id=>{
-        const name=pName(id);
-        const desc=potgDescs[id]||g.potgDesc||'No description provided.';
-        return `<div style="margin-top:10px;"><div style="font-family:'Oswald',sans-serif;font-size:.8rem;letter-spacing:1.5px;color:var(--blue-dark);margin-bottom:4px;">⭐ ${name}</div><div class="potg-desc">${desc}</div></div>`;
-      }).join('')}
+      <div class="potg-desc">${g.potgDesc||'No description provided.'}</div>
     </div>`:'';
 
   document.getElementById('boxscoreContent').innerHTML=`
@@ -1028,15 +1029,14 @@ window.addGameResult = async function(){
   const innings=[1,2,3,4,5].map(i=>+document.getElementById(`inn-${i}`).value||0);
   const oppInnings=[1,2,3,4,5].map(i=>+document.getElementById(`opp-${i}`).value||0);
   const potgIds=Array.from(document.getElementById('gr-potg').selectedOptions).map(o=>parseInt(o.value));
-  const potgDescs={}; potgIds.forEach(id=>{ const el=document.getElementById(`gr-desc-${id}`); if(el) potgDescs[id]=el.value.trim(); });
+  const potgDesc=document.getElementById('gr-desc').value.trim();
   setSync('syncing','Saving...');
   try{
-    await addDoc(collection(db,'game_results'),{gameNum,date,opp,us,them,innings,oppInnings,potgIds,potgDescs});
+    await addDoc(collection(db,'game_results'),{gameNum,date,opp,us,them,innings,oppInnings,potgIds,potgDesc});
+    ['gr-opp','gr-desc'].forEach(id=>document.getElementById(id).value='');
     ['gr-us','gr-them','gr-num'].forEach(id=>document.getElementById(id).value=0);
     [1,2,3,4,5].forEach(i=>{document.getElementById(`inn-${i}`).value=0;document.getElementById(`opp-${i}`).value=0;});
     Array.from(document.getElementById('gr-potg').options).forEach(o=>o.selected=false);
-    document.getElementById('gr-descs').innerHTML='';
-    document.getElementById('gr-opp').value='';
     setSync('connected','Live — synced across all devices');
     alert(`Game #${gameNum} saved!`);
   }catch(e){setSync('error','Save failed');alert('Error: '+e.message);}
@@ -1138,8 +1138,8 @@ window.openEditResult = function(docId){
   const inn    = g.innings    || [0,0,0,0,0];
   const oppInn = g.oppInnings || [0,0,0,0,0];
   [1,2,3,4,5].forEach(i=>{ document.getElementById(`er-i${i}`).value=inn[i-1]||0; document.getElementById(`er-o${i}`).value=oppInn[i-1]||0; });
+  document.getElementById('er-desc').value = g.potgDesc||'';
   Array.from(potgSel.options).forEach(o=>{ o.selected=(g.potgIds||[]).includes(parseInt(o.value)); });
-  renderPotgDescs('er-potg','er-descs', g.potgDescs||{}, g.potgDesc||'');
 
   document.getElementById('editResultModal').classList.add('active');
 }
@@ -1153,10 +1153,10 @@ window.saveEditResult = async function(){
   const innings    = [1,2,3,4,5].map(i=>+document.getElementById(`er-i${i}`).value||0);
   const oppInnings = [1,2,3,4,5].map(i=>+document.getElementById(`er-o${i}`).value||0);
   const potgIds = Array.from(document.getElementById('er-potg').selectedOptions).map(o=>parseInt(o.value));
-  const potgDescs={}; potgIds.forEach(id=>{ const el=document.getElementById(`er-desc-${id}`); if(el) potgDescs[id]=el.value.trim(); });
+  const potgDesc= document.getElementById('er-desc').value.trim();
   setSync('syncing','Saving...');
   try{
-    await updateDoc(doc(db,'game_results',docId),{date,opp,us,them,innings,oppInnings,potgIds,potgDescs});
+    await updateDoc(doc(db,'game_results',docId),{date,opp,us,them,innings,oppInnings,potgIds,potgDesc});
     setSync('connected','Live — synced across all devices');
     closeEditResult();
   }catch(e){setSync('error','Save failed');alert('Error: '+e.message);}
@@ -1282,7 +1282,7 @@ function renderModal(pid){
   const pitched=gs.filter(g=>g.ip>0);
   const pBody=document.getElementById('mPitLog'); pBody.innerHTML='';
   pitched.forEach(g=>{
-    const era=g.ip>0?f2((g.er/g.ip)*7):'—';
+    const era=g.ip>0?f2((g.er/g.ip)*4):'—';
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><strong>G${g.gameNum}</strong></td><td>${g.date}·${g.opp}</td>
       <td>${g.ip.toFixed(1)}</td><td>${g.er}</td><td>${g.ph}</td><td>${g.pbb}</td><td>${g.pk}</td><td>${era}</td>
@@ -1331,30 +1331,6 @@ window.switchModalTab=function(name){
   document.querySelectorAll('.modal-tab-btn').forEach((b,i)=>b.classList.toggle('active',['mb','mf','mp'][i]===name));
 }
 window.togglePanel=function(h){h.classList.toggle('collapsed');h.nextElementSibling.classList.toggle('hidden');}
-
-// ── POTG PER-PLAYER DESCRIPTION BOXES ─────────────────────────────────────
-window.renderPotgDescs = function(selectId, containerId, existingDescs={}, fallback=''){
-  const sel = document.getElementById(selectId);
-  const container = document.getElementById(containerId);
-  const selected = Array.from(sel.selectedOptions);
-  // Preserve any already-typed values before re-rendering
-  const current = {};
-  container.querySelectorAll('textarea[data-pid]').forEach(ta=>{ current[ta.dataset.pid]=ta.value; });
-  container.innerHTML = '';
-  selected.forEach(opt=>{
-    const pid = opt.value;
-    const name = opt.textContent;
-    const val = current[pid] ?? existingDescs[pid] ?? fallback;
-    const wrap = document.createElement('div');
-    wrap.className = 'form-group';
-    wrap.style.marginBottom = '10px';
-    wrap.innerHTML = `<label>⭐ Why ${name} was special</label>
-      <textarea data-pid="${pid}" id="${selectId.replace('potg','desc')}-${pid}" rows="2"
-        placeholder="Describe what made her shine..."
-        style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:'Roboto Condensed',sans-serif;font-size:.92rem;resize:vertical;background:var(--gray-light);">${val}</textarea>`;
-    container.appendChild(wrap);
-  });
-}
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 document.getElementById('gr-date').value=today();
