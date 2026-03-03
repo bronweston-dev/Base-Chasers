@@ -1346,7 +1346,7 @@ window.renderPotgDescs = function(selectId, containerId, existingDescs={}, fallb
     wrap.style.marginBottom = '10px';
     wrap.innerHTML = `<label>⭐ Why ${name} was special</label>
       <textarea data-pid="${pid}" id="${selectId.replace('potg','potg-desc')}-${pid}" rows="2"
-        placeholder="Describe what made her shine..."
+        placeholder="Type description here..."
         style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:'Roboto Condensed',sans-serif;font-size:.92rem;resize:vertical;background:var(--gray-light);">${val}</textarea>`;
     container.appendChild(wrap);
   });
