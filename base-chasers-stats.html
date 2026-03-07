@@ -1067,7 +1067,7 @@ window.addPlayerStats = async function(){
     sb:+document.getElementById('ps-sb').value||0,
     // fielding
     positions: (()=>{ const p=collectPositions('ps'); window._psPos=p; return p; })(),
-    pos: (window._psPos||[]).map(r=>r.pos).filter(Boolean).join('/') || '\u2014',
+    pos: (window._psPos||[]).map(r=>r.pos).filter(Boolean).join('/') || '—',
     po:  (window._psPos||[]).reduce((s,r)=>s+r.po,0),
     a:   (window._psPos||[]).reduce((s,r)=>s+r.a,0),
     // pitching
@@ -1077,11 +1077,9 @@ window.addPlayerStats = async function(){
     pbb:+document.getElementById('ps-pbb').value||0,
     pk: +document.getElementById('ps-pk').value||0,
   };
-  };
   setSync('syncing','Saving...');
   try{
     await addDoc(collection(db,'player_stats'), rec);
-    ['ps-pos'].forEach(id=>document.getElementById(id).value='');
     ['ps-ab','ps-r','ps-h','ps-2b','ps-3b','ps-hr','ps-rbi','ps-bb','ps-so','ps-sb','ps-ip','ps-er','ps-ph','ps-pbb','ps-pk'].forEach(id=>document.getElementById(id).value=0);
     document.getElementById('ps-batorder').value=1;
     buildPositionRows('ps-positions-wrap','ps');
@@ -1184,7 +1182,7 @@ window.saveEditPlayer = async function(){
     rbi:+document.getElementById('ep-rbi').value||0,bb:+document.getElementById('ep-bb').value||0,
     so:+document.getElementById('ep-so').value||0,  sb:+document.getElementById('ep-sb').value||0,
     positions: (()=>{ const p=collectPositions('ep'); window._epPos=p; return p; })(),
-    pos: (window._epPos||[]).map(r=>r.pos).filter(Boolean).join('/') || '\u2014',
+    pos: (window._epPos||[]).map(r=>r.pos).filter(Boolean).join('/') || '—',
     po:  (window._epPos||[]).reduce((s,r)=>s+r.po,0),
     a:   (window._epPos||[]).reduce((s,r)=>s+r.a,0),
     ip:+document.getElementById('ep-ip').value||0,  er:+document.getElementById('ep-er').value||0,
@@ -1259,8 +1257,8 @@ function renderModal(pid){
       tr.innerHTML='<td>'+(i===0?'<strong>G'+g.gameNum+'</strong>':'')+'</td>'
         +'<td>'+(i===0?g.date+'·'+g.opp:'')+'</td>'
         +'<td>'+r.pos+'</td><td>'+(r.inn||0)+'</td><td>'+r.po+'</td><td>'+r.a+'</td><td>'+(r.po+r.a)+'</td>'
-        +'<td>'+(i===0?'<button class="edit-row" onclick="openEditPlayer(\''+g._id+'\')">\u270F\uFE0F</button>'
-          +'<span class="delete-row" onclick="delPlayerStat(\''+g._id+'\')">\uD83D\uDDD1</span>':'')+'</td>';
+        +'<td>'+(i===0?'<button class="edit-row" onclick=\'openEditPlayer(\"'+g._id+'\")\'>✏️</button>'
+          +'<span class="delete-row" onclick=\'delPlayerStat(\"'+g._id+'\")\'>🗑</span>':'')+'</td>';
       fBody.appendChild(tr);
     });
   });
