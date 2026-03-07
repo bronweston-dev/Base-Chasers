@@ -942,15 +942,16 @@ window.showBoxScore = function(num){
   // POTG section
   const potgNames=(g.potgIds||[]).map(id=>pName(id));
   const potgDescs=g.potgDescs||{};
+  const potgPlayerBlocks=(g.potgIds||[]).map(id=>{
+    const name=pName(id);
+    const desc=potgDescs[id]||g.potgDesc||'No description provided.';
+    return '<div style="margin-top:10px;"><div style="font-family:\'Oswald\',sans-serif;font-size:.8rem;letter-spacing:1.5px;color:var(--blue-dark);margin-bottom:4px;">⭐ '+name+'</div><div class="potg-desc">'+desc+'</div></div>';
+  }).join('');
   const potgSection=potgNames.length?`
     <div class="potg-section">
       <div class="potg-title">⭐ Player of the Game</div>
       <div class="potg-chips">${potgNames.map(n=>`<div class="potg-chip">⭐ ${n}</div>`).join('')}</div>
-      ${(g.potgIds||[]).map(id=>{
-        const name=pName(id);
-        const desc=potgDescs[id]||g.potgDesc||'No description provided.';
-        return `<div style="margin-top:10px;"><div style="font-family:'Oswald',sans-serif;font-size:.8rem;letter-spacing:1.5px;color:var(--blue-dark);margin-bottom:4px;">⭐ ${name}</div><div class="potg-desc">${desc}</div></div>`;
-      }).join('')}
+      ${potgPlayerBlocks}
     </div>`:'';
 
   document.getElementById('boxscoreContent').innerHTML=`
@@ -1346,7 +1347,7 @@ window.renderPotgDescs = function(selectId, containerId, existingDescs={}, fallb
     wrap.style.marginBottom = '10px';
     wrap.innerHTML = `<label>⭐ Why ${name} was special</label>
       <textarea data-pid="${pid}" id="${selectId.replace('potg','potg-desc')}-${pid}" rows="2"
-        placeholder="Type description here..."
+        placeholder="Describe what made her shine..."
         style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:'Roboto Condensed',sans-serif;font-size:.92rem;resize:vertical;background:var(--gray-light);">${val}</textarea>`;
     container.appendChild(wrap);
   });
