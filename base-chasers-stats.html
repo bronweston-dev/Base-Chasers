@@ -631,6 +631,17 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
 // ── PLAYERS ───────────────────────────────────────────────────────────────
+// ── PASSWORD ──────────────────────────────────────────────────────────────
+const SITE_PASSWORD = 'OHYSA';
+let _pwUnlocked = false;
+function requirePassword(){
+  if(_pwUnlocked) return true;
+  const entry = prompt('Enter password to continue:');
+  if(entry === SITE_PASSWORD){ _pwUnlocked = true; return true; }
+  if(entry !== null) alert('Incorrect password.');
+  return false;
+}
+
 const PLAYERS = [
   {id:1,  num:8,  first:'Madelyn'},   {id:2,  num:3,  first:'Juno'},
   {id:3,  num:2,  first:'Jayla'},     {id:4,  num:9,  first:'Leighton'},
@@ -1025,6 +1036,7 @@ window.showBoxScore = function(num){
 
 // ── ADD GAME RESULT ───────────────────────────────────────────────────────
 window.addGameResult = async function(){
+  if(!requirePassword()) return;
   const gameNum=parseInt(document.getElementById('gr-num').value);
   if(!gameNum){ alert('Please enter a Game #.'); return; }
   if(gameResults.find(g=>g.gameNum===gameNum)){ alert(`Game #${gameNum} already exists. Delete it first to replace it.`); return; }
@@ -1049,6 +1061,7 @@ window.addGameResult = async function(){
 }
 
 window.delResult = async function(docId){
+  if(!requirePassword()) return;
   const g = gameResults.find(x=>x._id===docId);
   if(!g) return;
   const associated = playerStats.filter(x=>x.gameNum===g.gameNum);
@@ -1068,6 +1081,7 @@ window.delResult = async function(docId){
 
 // ── ADD PLAYER STATS ──────────────────────────────────────────────────────
 window.addPlayerStats = async function(){
+  if(!requirePassword()) return;
   const gameNum=parseInt(document.getElementById('ps-gamenum').value);
   const pid=parseInt(document.getElementById('ps-player').value);
   if(!gameNum){ alert('Please select a Game from the dropdown.'); return; }
@@ -1119,6 +1133,7 @@ window.addPlayerStats = async function(){
 }
 
 window.delPlayerStat = async function(docId){
+  if(!requirePassword()) return;
   if(!confirm('Delete this stat entry?')) return;
   setSync('syncing','Deleting...');
   try{ await deleteDoc(doc(db,'player_stats',docId)); setSync('connected','Live — synced'); }
@@ -1127,6 +1142,7 @@ window.delPlayerStat = async function(docId){
 
 // ── EDIT GAME RESULT ──────────────────────────────────────────────────────
 window.openEditResult = function(docId){
+  if(!requirePassword()) return;
   const g = gameResults.find(x=>x._id===docId);
   if(!g) return;
 
@@ -1175,6 +1191,7 @@ window.closeEditResultOnBg = e=>{ if(e.target===document.getElementById('editRes
 
 // ── EDIT PLAYER STATS ─────────────────────────────────────────────────────
 window.openEditPlayer = function(docId){
+  if(!requirePassword()) return;
   const g = playerStats.find(x=>x._id===docId);
   if(!g) return;
   const p = PLAYERS.find(x=>x.id===g.pid);
