@@ -1321,14 +1321,6 @@ window.showPage=function(name, gameNum){
   }
 }
 
-window.showBoxScore=function(num){
-  showPage('boxscore');
-  setTimeout(()=>{
-    document.getElementById('bs-game-select').value=num;
-    renderBoxScore();
-  },50);
-}
-
 window.switchStatTab=function(name){
   ['batting','fielding','pitching'].forEach(t=>{
     document.getElementById('stat-'+t).classList.toggle('active',t===name);
