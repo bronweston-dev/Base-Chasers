@@ -942,7 +942,7 @@ window.showBoxScore = function(num){
     const avg=gs.ab>0?f3(gs.h/gs.ab):'.---';
     const potgGm=g.potgIds&&g.potgIds.includes(p.id);
     return `<tr>
-      <td><span class="player-num">${p.num}</span>${p.first}${potgGm?' ⭐':''}</td>
+      <td style="cursor:pointer" onclick="openModal(${p.id})"><span class="player-num">${p.num}</span>${p.first}${potgGm?' ⭐':''}</td>
       <td>${gs.batOrder!=null?gs.batOrder:''}</td><td>${gs.ab}</td><td>${gs.r}</td><td>${gs.h}</td><td>${gs.d}</td>
       <td>${gs.t}</td><td>${gs.hr}</td><td>${gs.rbi}</td>
       <td>${gs.bb}</td><td>${gs.so}</td><td>${gs.sb}</td><td>${avg}</td>
@@ -954,7 +954,7 @@ window.showBoxScore = function(num){
     const gs=gPlayers.find(x=>x.pid===p.id);
     if(!gs) return '';
     return `<tr>
-      <td><span class="player-num">${p.num}</span>${p.first}</td>
+      <td style="cursor:pointer" onclick="openModal(${p.id})"><span class="player-num">${p.num}</span>${p.first}</td>
       <td>${gs.pos||'—'}</td><td>${gs.po}</td><td>${gs.a}</td><td>${gs.po+gs.a}</td>
     </tr>`;
   }).join('');
@@ -965,7 +965,7 @@ window.showBoxScore = function(num){
     const gs=gPlayers.find(x=>x.pid===p.id);
     const era=gs.ip>0?f2((gs.er/gs.ip)*4):'—';
     return `<tr>
-      <td><span class="player-num">${p.num}</span>${p.first}</td>
+      <td style="cursor:pointer" onclick="openModal(${p.id})"><span class="player-num">${p.num}</span>${p.first}</td>
       <td>${gs.ip.toFixed(1)}</td><td>${gs.er}</td><td>${gs.ph}</td>
       <td>${gs.pbb}</td><td>${gs.pk}</td><td>${era}</td>
     </tr>`;
@@ -1279,6 +1279,9 @@ function renderModal(pid){
     const gr=gameResults.find(x=>x.gameNum===g.gameNum);
     const potg=gr&&gr.potgIds&&gr.potgIds.includes(pid);
     const tr=document.createElement('tr');
+    tr.style.cursor='pointer';
+    tr.title='View box score';
+    tr.onclick=(e)=>{ if(e.target.tagName==='BUTTON'||e.target.tagName==='SPAN') return; closeModal(); showBoxScore(g.gameNum); };
     tr.innerHTML=`<td><strong>G${g.gameNum}</strong></td><td>${g.date}·${g.opp}</td>
       <td>${g.ab}</td><td>${g.r}</td><td>${g.h}</td><td>${g.d}</td><td>${g.t}</td><td>${g.hr}</td>
       <td>${g.rbi}</td><td>${g.bb}</td><td>${g.so}</td><td>${g.sb}</td><td>${avg}</td>
