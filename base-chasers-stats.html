@@ -268,7 +268,7 @@
           <th>Date / Opponent</th>
           <th>Result</th>
           <th>Score</th>
-          <th>R</th><th>RA</th>
+          <th>H</th><th>PO</th>
           <th>⭐ POTG</th>
           <th></th>
         </tr></thead>
@@ -795,8 +795,9 @@ function renderTeamStats(){
     const diff=g.us-g.them;
     const res=diff>0?'W':diff<0?'L':'T';
     const rcls=diff>0?'result-w':diff<0?'result-l':'result-t';
-    const inn=g.innings||[0,0,0,0,0];
-    const oppInn=g.oppInnings||[0,0,0,0,0];
+    const gStats=playerStats.filter(x=>x.gameNum===g.gameNum);
+    const hits=gStats.reduce((s,x)=>s+x.h,0);
+    const po=gStats.reduce((s,x)=>s+x.po,0);
     const potgNames=(g.potgIds||[]).map(id=>pName(id)).join(', ');
     const potgCell=potgNames?`<td><button class="potg-badge" onclick="showBoxScore(${g.gameNum})">⭐ ${potgNames}</button></td>`:'<td>—</td>';
     const tr=document.createElement('tr');
@@ -807,7 +808,7 @@ function renderTeamStats(){
       <td>${g.date} · vs ${g.opp}</td>
       <td><span class="${rcls}">${res}</span></td>
       <td>${g.us}–${g.them}</td>
-      <td>${g.us}</td><td>${g.them}</td>
+      <td>${hits}</td><td>${po}</td>
       ${potgCell}
       <td>
         <button class="edit-row" onclick="event.stopPropagation();openEditResult('${g._id}')">✏️ Edit</button>
