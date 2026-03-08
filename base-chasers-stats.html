@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Base Chasers Stats v2026-03-08-0001 | Last updated: Sun Mar 8 2026 12:01 AM UTC -->
+<!-- Base Chasers Stats v2026-03-08-0100 | Last updated: Sun Mar 8 2026 1:00 AM UTC -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -268,6 +268,7 @@
           <th>Date / Opponent</th>
           <th>Result</th>
           <th>Score</th>
+          <th colspan="4" style="background:var(--blue);">Innings</th>
           <th>R</th><th>RA</th>
           <th>⭐ POTG</th>
           <th></th>
@@ -401,9 +402,12 @@
       <div class="form-row">
         <div class="form-group" style="grid-column:span 3">
           <label>Player(s) — hold Ctrl/Cmd to select multiple</label>
-          <select id="gr-potg" multiple style="height:85px;background:white;" onchange="renderPotgDescs('gr-potg','gr-descs')"></select>
+          <select id="gr-potg" multiple style="height:85px;background:white;"></select>
         </div>
-        <div style="grid-column:span 3" id="gr-descs"></div>
+        <div class="form-group" style="grid-column:span 3">
+          <label>Why she was special</label>
+          <textarea id="gr-desc" rows="2" placeholder="Describe what made her shine..." style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:'Roboto Condensed',sans-serif;font-size:.92rem;resize:vertical;background:var(--gray-light);"></textarea>
+        </div>
       </div>
       <button class="btn btn-primary" onclick="addGameResult()">+ Save Game Result</button>
     </div>
@@ -423,7 +427,7 @@
           <select id="ps-gamenum" onchange="onGameSelect()"><option value="">-- Select Game --</option></select>
         </div>
         <div class="form-group"><label>Player</label><select id="ps-player"></select></div>
-        <div class="form-group"><label>Bat Order</label><input type="number" id="ps-batorder" min="1" max="20" value="1" placeholder="#"></div>
+        <div class="form-group"><label>Bat Order #</label><input type="number" id="ps-batorder" min="1" max="20" value="1"></div>
         <div class="form-group"><label>Date</label><input type="text" id="ps-date" readonly style="background:#e8e8e8;color:#555;"></div>
         <div class="form-group"><label>Opponent</label><input type="text" id="ps-opp" readonly style="background:#e8e8e8;color:#555;"></div>
       </div>
@@ -443,7 +447,11 @@
       </div>
 
       <div class="form-divider">🧤 Fielding Stats</div>
-      <div id="ps-positions-wrap"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Position</label><input type="text" id="ps-pos" placeholder="e.g. SS, P, CF"></div>
+        <div class="form-group"><label>PO (Put Outs)</label><input type="number" id="ps-po" min="0" value="0"></div>
+        <div class="form-group"><label>A (Assists)</label><input type="number" id="ps-a" min="0" value="0"></div>
+      </div>
 
       <div class="form-divider">⚾ Pitching Stats <span style="font-size:.75rem;font-weight:400;color:#888;">(enter 0 IP if did not pitch)</span></div>
       <div class="form-row">
@@ -487,7 +495,7 @@
         <div class="card-stats" id="mCardFld"></div>
         <div class="log-title">FIELDING GAME LOG</div>
         <div class="table-wrap"><table class="log-table">
-          <thead><tr><th>Gm</th><th>Date/Opp</th><th>Pos</th><th>Inn</th><th>PO</th><th>A</th><th>TC</th><th></th></tr></thead>
+          <thead><tr><th>Gm</th><th>Date/Opp</th><th>Pos</th><th>PO</th><th>A</th><th>TC</th><th></th></tr></thead>
           <tbody id="mFldLog"></tbody>
         </table></div>
         <div id="mNoFld" class="no-data" style="display:none">No fielding stats yet.</div>
@@ -541,9 +549,12 @@
       <div class="form-row">
         <div class="form-group" style="grid-column:span 3">
           <label>Player(s) — hold Ctrl/Cmd for multiple</label>
-          <select id="er-potg" multiple style="height:80px;background:white;" onchange="renderPotgDescs('er-potg','er-descs')"></select>
+          <select id="er-potg" multiple style="height:80px;background:white;"></select>
         </div>
-        <div style="grid-column:span 3" id="er-descs"></div>
+        <div class="form-group" style="grid-column:span 3">
+          <label>Why she was special</label>
+          <textarea id="er-desc" rows="2" style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:'Roboto Condensed',sans-serif;font-size:.92rem;resize:vertical;background:var(--gray-light);"></textarea>
+        </div>
       </div>
       <div class="edit-btn-row">
         <button class="btn btn-primary" onclick="saveEditResult()">💾 Save Changes</button>
@@ -564,7 +575,7 @@
       <input type="hidden" id="ep-docid">
       <div class="form-row">
         <div class="form-group"><label>Game #</label><input type="number" id="ep-gamenum" readonly style="background:#e8e8e8;"></div>
-        <div class="form-group"><label>Bat Order</label><input type="number" id="ep-batorder" min="1" max="20"></div>
+        <div class="form-group"><label>Bat Order #</label><input type="number" id="ep-batorder" min="1" max="20"></div>
         <div class="form-group"><label>Date</label><input type="date" id="ep-date"></div>
         <div class="form-group"><label>Opponent</label><input type="text" id="ep-opp"></div>
       </div>
@@ -582,7 +593,11 @@
         <div class="form-group"><label>SB</label><input type="number" id="ep-sb" min="0"></div>
       </div>
       <div class="form-divider">🧤 Fielding</div>
-      <div id="ep-positions-wrap"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Position</label><input type="text" id="ep-pos"></div>
+        <div class="form-group"><label>PO</label><input type="number" id="ep-po" min="0"></div>
+        <div class="form-group"><label>A</label><input type="number" id="ep-a" min="0"></div>
+      </div>
       <div class="form-divider">⚾ Pitching</div>
       <div class="form-row">
         <div class="form-group"><label>IP</label><input type="number" id="ep-ip" min="0" step="0.1"></div>
@@ -623,7 +638,7 @@ const PLAYERS = [
   {id:5,  num:5,  first:'Rosalie'},   {id:6,  num:6,  first:'Kylie'},
   {id:7,  num:7,  first:'Emily'},     {id:8,  num:8,  first:'Madelyn'},
   {id:9,  num:9,  first:'Leighton'},  {id:10, num:10, first:'Nova'},
-  {id:11, num:12, first:'Lucy'},
+  {id:11, num:12, first:'Lucy'},      {id:12, num:11, first:'Sophie'},
 ];
 
 let gameResults  = [];
@@ -793,6 +808,7 @@ function renderTeamStats(){
       <td>${g.date} · vs ${g.opp}</td>
       <td><span class="${rcls}">${res}</span></td>
       <td>${g.us}–${g.them}</td>
+      <td>${inn[0]}</td><td>${inn[1]}</td><td>${inn[2]}</td><td>${inn[3]}</td>
       <td>${g.us}</td><td>${g.them}</td>
       ${potgCell}
       <td>
@@ -887,6 +903,7 @@ window.showBoxScore = function(num){
   const g=gameResults.find(x=>x.gameNum===num);
   if(!g){ document.getElementById('boxscoreContent').innerHTML='<div class="no-data">Game not found.</div>'; return; }
 
+  // Switch to box score page and set select
   showPage('boxscore');
   document.getElementById('bs-game-select').value=num;
 
@@ -894,106 +911,117 @@ window.showBoxScore = function(num){
   const oppInn=g.oppInnings||[0,0,0,0,0];
   const res=g.us>g.them?'W':g.us<g.them?'L':'T';
 
+  // Players who played this game
   const gPlayers=playerStats.filter(x=>x.gameNum===num);
   const pidList=[...new Set(gPlayers.map(x=>x.pid))];
-  // Sort by batting order, fall back to jersey number
   const lineup=pidList.map(id=>{
     const player=PLAYERS.find(p=>p.id===id);
     const stats=gPlayers.find(x=>x.pid===id);
     return {player, batOrder: stats&&stats.batOrder!=null?stats.batOrder:999};
   }).filter(x=>x.player).sort((a,b)=>a.batOrder-b.batOrder).map(x=>x.player);
 
-  const inningHeaders=[1,2,3,4].map(i=>'<div class="linescore-cell header">'+i+'</div>').join('');
-  const ourRuns=[0,1,2,3].map(i=>'<div class="linescore-cell our-run">'+(inn[i]||0)+'</div>').join('');
-  const oppRuns=[0,1,2,3].map(i=>'<div class="linescore-cell">'+(oppInn[i]||0)+'</div>').join('');
+  // Linescore
+  const inningHeaders=[1,2,3,4].map(i=>`<div class="linescore-cell header">I${i}</div>`).join('');
+  const ourRuns=[0,1,2,3].map(i=>`<div class="linescore-cell our-run">${inn[i]||0}</div>`).join('');
+  const oppRuns=[0,1,2,3].map(i=>`<div class="linescore-cell">${oppInn[i]||0}</div>`).join('');
 
+  // Batting box
   const batRows=lineup.map(p=>{
     const gs=gPlayers.find(x=>x.pid===p.id);
     if(!gs) return '';
     const avg=gs.ab>0?f3(gs.h/gs.ab):'.---';
-    const star=g.potgIds&&g.potgIds.includes(p.id)?' ⭐':'';
-    const bo=gs.batOrder!=null?gs.batOrder:'';
-    return '<tr><td><span class="player-num">'+p.num+'</span>'+p.first+star+'</td>'
-      +'<td>'+bo+'</td>'
-      +'<td>'+gs.ab+'</td><td>'+gs.r+'</td><td>'+gs.h+'</td><td>'+gs.d+'</td>'
-      +'<td>'+gs.t+'</td><td>'+gs.hr+'</td><td>'+gs.rbi+'</td>'
-      +'<td>'+gs.bb+'</td><td>'+gs.so+'</td><td>'+gs.sb+'</td><td>'+avg+'</td></tr>';
+    const potgGm=g.potgIds&&g.potgIds.includes(p.id);
+    return `<tr>
+      <td><span class="player-num">${p.num}</span>${p.first}${potgGm?' ⭐':''}</td>
+      <td>${gs.batOrder!=null?gs.batOrder:''}</td><td>${gs.ab}</td><td>${gs.r}</td><td>${gs.h}</td><td>${gs.d}</td>
+      <td>${gs.t}</td><td>${gs.hr}</td><td>${gs.rbi}</td>
+      <td>${gs.bb}</td><td>${gs.so}</td><td>${gs.sb}</td><td>${avg}</td>
+    </tr>`;
   }).join('');
 
-  const fldRows=lineup.flatMap(p=>{
+  // Fielding box
+  const fldRows=lineup.map(p=>{
     const gs=gPlayers.find(x=>x.pid===p.id);
-    if(!gs) return [];
-    const positions=gs.positions&&gs.positions.length?gs.positions:[{pos:gs.pos||'—',inn:0,po:gs.po||0,a:gs.a||0}];
-    return positions.filter(r=>r.pos&&r.pos!=='—').map((r,i)=>{
-      const nameCell=i===0?'<span class="player-num">'+p.num+'</span>'+p.first:'';
-      return '<tr><td style="text-align:left;padding-left:12px;">'+nameCell+'</td>'
-        +'<td>'+r.pos+'</td><td>'+(r.inn||0)+'</td><td>'+r.po+'</td><td>'+r.a+'</td><td>'+(r.po+r.a)+'</td></tr>';
-    });
+    if(!gs) return '';
+    return `<tr>
+      <td><span class="player-num">${p.num}</span>${p.first}</td>
+      <td>${gs.pos||'—'}</td><td>${gs.po}</td><td>${gs.a}</td><td>${gs.po+gs.a}</td>
+    </tr>`;
   }).join('');
 
+  // Pitching box — only players who pitched
   const pitchers=lineup.filter(p=>{ const gs=gPlayers.find(x=>x.pid===p.id); return gs&&gs.ip>0; });
   const pitRows=pitchers.map(p=>{
     const gs=gPlayers.find(x=>x.pid===p.id);
     const era=gs.ip>0?f2((gs.er/gs.ip)*4):'—';
-    return '<tr><td><span class="player-num">'+p.num+'</span>'+p.first+'</td>'
-      +'<td>'+gs.ip.toFixed(1)+'</td><td>'+gs.er+'</td><td>'+gs.ph+'</td>'
-      +'<td>'+gs.pbb+'</td><td>'+gs.pk+'</td><td>'+era+'</td></tr>';
+    return `<tr>
+      <td><span class="player-num">${p.num}</span>${p.first}</td>
+      <td>${gs.ip.toFixed(1)}</td><td>${gs.er}</td><td>${gs.ph}</td>
+      <td>${gs.pbb}</td><td>${gs.pk}</td><td>${era}</td>
+    </tr>`;
   }).join('');
 
-  const potgDescs=g.potgDescs||{};
-  const potgIds=g.potgIds||[];
-  let potgSection='';
-  if(potgIds.length){
-    const chips=potgIds.map(id=>'<div class="potg-chip">⭐ '+pName(id)+'</div>').join('');
-    const blocks=potgIds.map(id=>{
-      const desc=potgDescs[id]||g.potgDesc||'No description provided.';
-      return '<div style="margin-top:10px;">'
-        +'<div style="font-family:\'Oswald\',sans-serif;font-size:.8rem;letter-spacing:1.5px;color:var(--blue-dark);margin-bottom:4px;">⭐ '+pName(id)+'</div>'
-        +'<div class="potg-desc">'+desc+'</div></div>';
-    }).join('');
-    potgSection='<div class="potg-section"><div class="potg-title">⭐ Player of the Game</div>'
-      +'<div class="potg-chips">'+chips+'</div>'+blocks+'</div>';
-  }
+  // POTG section
+  const potgNames=(g.potgIds||[]).map(id=>pName(id));
+  const potgSection=potgNames.length?`
+    <div class="potg-section">
+      <div class="potg-title">⭐ Player of the Game</div>
+      <div class="potg-chips">${potgNames.map(n=>`<div class="potg-chip">⭐ ${n}</div>`).join('')}</div>
+      <div class="potg-desc">${g.potgDesc||'No description provided.'}</div>
+    </div>`:'';
 
-  const batTable=lineup.length
-    ?'<div class="table-wrap"><table class="bs-table"><thead><tr>'
-      +'<th style="text-align:left;padding-left:12px;">Player</th>'
-      +'<th>#</th><th>AB</th><th>R</th><th>H</th><th>2B</th><th>3B</th><th>HR</th>'
-      +'<th>RBI</th><th>BB</th><th>SO</th><th>SB</th><th>AVG</th>'
-      +'</tr></thead><tbody>'+batRows+'</tbody></table></div>'
-    :'<div class="no-data">No player stats for this game yet.</div>';
+  document.getElementById('boxscoreContent').innerHTML=`
+    <div class="boxscore-panel">
+      <div class="bs-header">
+        <h2>Game ${g.gameNum} — vs ${g.opp}</h2>
+        <div class="bs-meta">${g.date} · <strong>${res} ${g.us}–${g.them}</strong></div>
+      </div>
 
-  const fldTable=lineup.length
-    ?'<div class="table-wrap"><table class="bs-table"><thead><tr>'
-      +'<th style="text-align:left;padding-left:12px;">Player</th>'
-      +'<th>Pos</th><th>Inn</th><th>PO</th><th>A</th><th>TC</th>'
-      +'</tr></thead><tbody>'+fldRows+'</tbody></table></div>'
-    :'<div class="no-data">No fielding stats for this game yet.</div>';
+      <div class="bs-section">
+        <div class="bs-section-title">Line Score</div>
+        <div class="linescore">
+          <div class="linescore-cell header team-name">Team</div>
+          ${inningHeaders}
+          <div class="linescore-cell header">R</div>
+        </div>
+        <div class="linescore">
+          <div class="linescore-cell team-name">Base Chasers</div>
+          ${ourRuns}
+          <div class="linescore-cell total">${g.us}</div>
+        </div>
+        <div class="linescore">
+          <div class="linescore-cell team-name">${g.opp}</div>
+          ${oppRuns}
+          <div class="linescore-cell total">${g.them}</div>
+        </div>
+      </div>
 
-  const pitTable=pitchers.length
-    ?'<div class="bs-section"><div class="bs-section-title">Pitching</div>'
-      +'<div class="table-wrap"><table class="bs-table"><thead><tr>'
-      +'<th style="text-align:left;padding-left:12px;">Player</th>'
-      +'<th>IP</th><th>ER</th><th>H</th><th>BB</th><th>K</th><th>ERA</th>'
-      +'</tr></thead><tbody>'+pitRows+'</tbody></table></div></div>'
-    :'';
+      <div class="bs-section">
+        <div class="bs-section-title">Batting</div>
+        ${lineup.length?`<div class="table-wrap"><table class="bs-table">
+          <thead><tr><th style="text-align:left;padding-left:12px;">Player</th><th>#</th><th>AB</th><th>R</th><th>H</th><th>2B</th><th>3B</th><th>HR</th><th>RBI</th><th>BB</th><th>SO</th><th>SB</th><th>AVG</th></tr></thead>
+          <tbody>${batRows}</tbody>
+        </table></div>`:'<div class="no-data">No player stats for this game yet.</div>'}
+      </div>
 
-  document.getElementById('boxscoreContent').innerHTML=
-    '<div class="boxscore-panel">'
-    +'<div class="bs-header">'
-      +'<h2>Game '+g.gameNum+' — vs '+g.opp+'</h2>'
-      +'<div class="bs-meta">'+g.date+' · <strong>'+res+' '+g.us+'–'+g.them+'</strong></div>'
-    +'</div>'
-    +'<div class="bs-section"><div class="bs-section-title">Line Score</div>'
-      +'<div class="linescore"><div class="linescore-cell header team-name"></div>'+inningHeaders+'<div class="linescore-cell header">R</div></div>'
-      +'<div class="linescore"><div class="linescore-cell team-name">Base Chasers</div>'+ourRuns+'<div class="linescore-cell total">'+g.us+'</div></div>'
-      +'<div class="linescore"><div class="linescore-cell team-name">'+g.opp+'</div>'+oppRuns+'<div class="linescore-cell total">'+g.them+'</div></div>'
-    +'</div>'
-    +'<div class="bs-section"><div class="bs-section-title">Batting</div>'+batTable+'</div>'
-    +'<div class="bs-section"><div class="bs-section-title">Fielding</div>'+fldTable+'</div>'
-    +pitTable
-    +potgSection
-    +'</div>';
+      <div class="bs-section">
+        <div class="bs-section-title">Fielding</div>
+        ${lineup.length?`<div class="table-wrap"><table class="bs-table">
+          <thead><tr><th style="text-align:left;padding-left:12px;">Player</th><th>Pos</th><th>PO</th><th>A</th><th>TC</th></tr></thead>
+          <tbody>${fldRows}</tbody>
+        </table></div>`:'<div class="no-data">No fielding stats for this game yet.</div>'}
+      </div>
+
+      ${pitchers.length?`<div class="bs-section">
+        <div class="bs-section-title">Pitching</div>
+        <div class="table-wrap"><table class="bs-table">
+          <thead><tr><th style="text-align:left;padding-left:12px;">Player</th><th>IP</th><th>ER</th><th>H</th><th>BB</th><th>K</th><th>ERA</th></tr></thead>
+          <tbody>${pitRows}</tbody>
+        </table></div>
+      </div>`:''}
+
+      ${potgSection}
+    </div>`;
 }
 
 // ── ADD GAME RESULT ───────────────────────────────────────────────────────
@@ -1008,15 +1036,15 @@ window.addGameResult = async function(){
   const innings=[1,2,3,4,5].map(i=>+document.getElementById(`inn-${i}`).value||0);
   const oppInnings=[1,2,3,4,5].map(i=>+document.getElementById(`opp-${i}`).value||0);
   const potgIds=Array.from(document.getElementById('gr-potg').selectedOptions).map(o=>parseInt(o.value));
-  const potgDescs={}; potgIds.forEach(id=>{ const el=document.getElementById('gr-potg-desc-'+id); if(el) potgDescs[id]=el.value.trim(); });
+  const potgDesc=document.getElementById('gr-desc').value.trim();
   setSync('syncing','Saving...');
   try{
-    await addDoc(collection(db,'game_results'),{gameNum,date,opp,us,them,innings,oppInnings,potgIds,potgDescs});
-    document.getElementById('gr-opp').value='';
-    document.getElementById('gr-descs').innerHTML='';
+    await addDoc(collection(db,'game_results'),{gameNum,date,opp,us,them,innings,oppInnings,potgIds,potgDesc});
+    ['gr-opp','gr-desc'].forEach(id=>document.getElementById(id).value='');
     ['gr-us','gr-them','gr-num'].forEach(id=>document.getElementById(id).value=0);
-    [1,2,3,4,5].forEach(i=>{document.getElementById('inn-'+i).value=0;document.getElementById('opp-'+i).value=0;});
+    [1,2,3,4,5].forEach(i=>{document.getElementById(`inn-${i}`).value=0;document.getElementById(`opp-${i}`).value=0;});
     Array.from(document.getElementById('gr-potg').options).forEach(o=>o.selected=false);
+    setSync('connected','Live — synced across all devices');
     alert(`Game #${gameNum} saved!`);
   }catch(e){setSync('error','Save failed');alert('Error: '+e.message);}
 }
@@ -1066,10 +1094,9 @@ window.addPlayerStats = async function(){
     so:+document.getElementById('ps-so').value||0,
     sb:+document.getElementById('ps-sb').value||0,
     // fielding
-    positions: (()=>{ const p=collectPositions('ps'); window._psPos=p; return p; })(),
-    pos: (window._psPos||[]).map(r=>r.pos).filter(Boolean).join('/') || '—',
-    po:  (window._psPos||[]).reduce((s,r)=>s+r.po,0),
-    a:   (window._psPos||[]).reduce((s,r)=>s+r.a,0),
+    pos:document.getElementById('ps-pos').value||'—',
+    po:+document.getElementById('ps-po').value||0,
+    a: +document.getElementById('ps-a').value||0,
     // pitching
     ip: +document.getElementById('ps-ip').value||0,
     er: +document.getElementById('ps-er').value||0,
@@ -1080,9 +1107,9 @@ window.addPlayerStats = async function(){
   setSync('syncing','Saving...');
   try{
     await addDoc(collection(db,'player_stats'), rec);
-    ['ps-ab','ps-r','ps-h','ps-2b','ps-3b','ps-hr','ps-rbi','ps-bb','ps-so','ps-sb','ps-ip','ps-er','ps-ph','ps-pbb','ps-pk'].forEach(id=>document.getElementById(id).value=0);
     document.getElementById('ps-batorder').value=1;
-    buildPositionRows('ps-positions-wrap','ps');
+    ['ps-pos'].forEach(id=>document.getElementById(id).value='');
+    ['ps-ab','ps-r','ps-h','ps-2b','ps-3b','ps-hr','ps-rbi','ps-bb','ps-so','ps-sb','ps-po','ps-a','ps-ip','ps-er','ps-ph','ps-pbb','ps-pk'].forEach(id=>document.getElementById(id).value=0);
     document.getElementById('ps-player').value='';
     document.getElementById('ps-gamenum').value='';
     document.getElementById('ps-date').value='';
@@ -1120,9 +1147,9 @@ window.openEditResult = function(docId){
   const inn    = g.innings    || [0,0,0,0,0];
   const oppInn = g.oppInnings || [0,0,0,0,0];
   [1,2,3,4,5].forEach(i=>{ document.getElementById(`er-i${i}`).value=inn[i-1]||0; document.getElementById(`er-o${i}`).value=oppInn[i-1]||0; });
+  document.getElementById('er-desc').value = g.potgDesc||'';
   Array.from(potgSel.options).forEach(o=>{ o.selected=(g.potgIds||[]).includes(parseInt(o.value)); });
-  renderPotgDescs('er-potg','er-descs', g.potgDescs||{}, g.potgDesc||'');
-  Array.from(potgSel.options).forEach(o=>{ o.selected=(g.potgIds||[]).includes(parseInt(o.value)); });
+
   document.getElementById('editResultModal').classList.add('active');
 }
 
@@ -1135,11 +1162,10 @@ window.saveEditResult = async function(){
   const innings    = [1,2,3,4,5].map(i=>+document.getElementById(`er-i${i}`).value||0);
   const oppInnings = [1,2,3,4,5].map(i=>+document.getElementById(`er-o${i}`).value||0);
   const potgIds = Array.from(document.getElementById('er-potg').selectedOptions).map(o=>parseInt(o.value));
-  const potgIds_er = Array.from(document.getElementById('er-potg').selectedOptions).map(o=>parseInt(o.value));
-  const potgDescs_er={}; potgIds_er.forEach(id=>{ const el=document.getElementById('er-potg-desc-'+id); if(el) potgDescs_er[id]=el.value.trim(); });
+  const potgDesc= document.getElementById('er-desc').value.trim();
   setSync('syncing','Saving...');
   try{
-    await updateDoc(doc(db,'game_results',docId),{date,opp,us,them,innings,oppInnings,potgIds:potgIds_er,potgDescs:potgDescs_er});
+    await updateDoc(doc(db,'game_results',docId),{date,opp,us,them,innings,oppInnings,potgIds,potgDesc});
     setSync('connected','Live — synced across all devices');
     closeEditResult();
   }catch(e){setSync('error','Save failed');alert('Error: '+e.message);}
@@ -1162,7 +1188,10 @@ window.openEditPlayer = function(docId){
   document.getElementById('ep-h').value   = g.h;   document.getElementById('ep-2b').value  = g.d;
   document.getElementById('ep-3b').value  = g.t;   document.getElementById('ep-hr').value  = g.hr;
   document.getElementById('ep-rbi').value = g.rbi; document.getElementById('ep-bb').value  = g.bb;
-  buildPositionRows('ep-positions-wrap','ep', g.positions||[{pos:g.pos||'',inn:0,po:g.po||0,a:g.a||0}]);
+  document.getElementById('ep-so').value  = g.so;  document.getElementById('ep-sb').value  = g.sb;
+  document.getElementById('ep-batorder').value = g.batOrder||1;
+  document.getElementById('ep-pos').value = g.pos||'';
+  document.getElementById('ep-po').value  = g.po;  document.getElementById('ep-a').value   = g.a;
   document.getElementById('ep-ip').value  = g.ip;  document.getElementById('ep-er').value  = g.er;
   document.getElementById('ep-ph').value  = g.ph;  document.getElementById('ep-pbb').value = g.pbb;
   document.getElementById('ep-pk').value  = g.pk;
@@ -1181,10 +1210,8 @@ window.saveEditPlayer = async function(){
     t: +document.getElementById('ep-3b').value||0,  hr:+document.getElementById('ep-hr').value||0,
     rbi:+document.getElementById('ep-rbi').value||0,bb:+document.getElementById('ep-bb').value||0,
     so:+document.getElementById('ep-so').value||0,  sb:+document.getElementById('ep-sb').value||0,
-    positions: (()=>{ const p=collectPositions('ep'); window._epPos=p; return p; })(),
-    pos: (window._epPos||[]).map(r=>r.pos).filter(Boolean).join('/') || '—',
-    po:  (window._epPos||[]).reduce((s,r)=>s+r.po,0),
-    a:   (window._epPos||[]).reduce((s,r)=>s+r.a,0),
+    pos:document.getElementById('ep-pos').value||'—',
+    po:+document.getElementById('ep-po').value||0,  a:+document.getElementById('ep-a').value||0,
     ip:+document.getElementById('ep-ip').value||0,  er:+document.getElementById('ep-er').value||0,
     ph:+document.getElementById('ep-ph').value||0,  pbb:+document.getElementById('ep-pbb').value||0,
     pk:+document.getElementById('ep-pk').value||0,
@@ -1251,16 +1278,14 @@ function renderModal(pid){
   // Fielding log
   const fBody=document.getElementById('mFldLog'); fBody.innerHTML='';
   gs.forEach(g=>{
-    const positions=g.positions&&g.positions.length?g.positions:[{pos:g.pos||'—',inn:0,po:g.po||0,a:g.a||0}];
-    positions.filter(r=>r.pos&&r.pos!=='—').forEach((r,i)=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML='<td>'+(i===0?'<strong>G'+g.gameNum+'</strong>':'')+'</td>'
-        +'<td>'+(i===0?g.date+'·'+g.opp:'')+'</td>'
-        +'<td>'+r.pos+'</td><td>'+(r.inn||0)+'</td><td>'+r.po+'</td><td>'+r.a+'</td><td>'+(r.po+r.a)+'</td>'
-        +'<td>'+(i===0?'<button class="edit-row" onclick=\'openEditPlayer(\"'+g._id+'\")\'>✏️</button>'
-          +'<span class="delete-row" onclick=\'delPlayerStat(\"'+g._id+'\")\'>🗑</span>':'')+'</td>';
-      fBody.appendChild(tr);
-    });
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>G${g.gameNum}</strong></td><td>${g.date}·${g.opp}</td>
+      <td>${g.pos||'—'}</td><td>${g.po}</td><td>${g.a}</td><td>${g.po+g.a}</td>
+      <td>
+        <button class="edit-row" onclick="openEditPlayer('${g._id}')">✏️</button>
+        <span class="delete-row" onclick="delPlayerStat('${g._id}')">🗑</span>
+      </td>`;
+    fBody.appendChild(tr);
   });
   document.getElementById('mNoFld').style.display=gs.length?'none':'block';
 
@@ -1296,6 +1321,13 @@ window.showPage=function(name, gameNum){
   }
 }
 
+window.showBoxScore=function(num){
+  showPage('boxscore');
+  setTimeout(()=>{
+    document.getElementById('bs-game-select').value=num;
+    renderBoxScore();
+  },50);
+}
 
 window.switchStatTab=function(name){
   ['batting','fielding','pitching'].forEach(t=>{
@@ -1312,97 +1344,7 @@ window.switchModalTab=function(name){
 window.togglePanel=function(h){h.classList.toggle('collapsed');h.nextElementSibling.classList.toggle('hidden');}
 
 // ── INIT ──────────────────────────────────────────────────────────────────
-// ── POTG PER-PLAYER DESCRIPTION BOXES ──────────────────────────────────────
-window.renderPotgDescs = function(selectId, containerId, existingDescs, fallback){
-  existingDescs = existingDescs||{}; fallback = fallback||'';
-  const sel = document.getElementById(selectId);
-  const container = document.getElementById(containerId);
-  const selected = Array.from(sel.selectedOptions);
-  const current = {};
-  container.querySelectorAll('textarea[data-pid]').forEach(ta=>{ current[ta.dataset.pid]=ta.value; });
-  container.innerHTML = '';
-  selected.forEach(opt=>{
-    const pid = opt.value;
-    const name = opt.textContent;
-    const val = current[pid]!==undefined ? current[pid] : (existingDescs[pid]!==undefined ? existingDescs[pid] : fallback);
-    const wrap = document.createElement('div');
-    wrap.className = 'form-group';
-    wrap.style.marginBottom = '10px';
-    wrap.innerHTML = '<label>⭐ Why '+name+' was special</label>'
-      +'<textarea data-pid="'+pid+'" id="'+selectId.replace('potg','potg-desc')+'-'+pid+'" rows="2"'
-      +' placeholder="Describe what made her shine..."'
-      +' style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:\'Roboto Condensed\',sans-serif;font-size:.92rem;resize:vertical;background:var(--gray-light);">'+val+'</textarea>';
-    container.appendChild(wrap);
-  });
-}
-
-// ── FIELDING POSITION ROWS ───────────────────────────────────────────────────
-const POSITIONS = ['','P','C','1B','2B','3B','SS','LF','CF','Rover','RF'];
-
-function posSelect(prefix, idx, val){
-  val = val||'';
-  return '<select class="pos-sel" data-prefix="'+prefix+'" data-idx="'+idx+'"'
-    +' onchange="onPosChange(\''+prefix+'\','+idx+')"'
-    +' style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:\'Roboto Condensed\',sans-serif;font-size:.92rem;background:var(--gray-light);">'
-    +POSITIONS.map(p=>'<option value="'+p+'"'+(p===val?' selected':'')+'>'+( p||'-- Position --')+'</option>').join('')
-    +'</select>';
-}
-
-function posRowHTML(prefix, idx, data){
-  data = data||{};
-  const inn = data.inn!=null?data.inn:0;
-  const po  = data.po!=null?data.po:0;
-  const a   = data.a!=null?data.a:0;
-  const lbl = 'style="font-size:.72rem;font-weight:700;letter-spacing:1.5px;color:var(--blue);display:block;margin-bottom:3px;text-transform:uppercase;"';
-  const inp = 'style="width:100%;padding:7px 10px;border:2px solid var(--gray);border-radius:6px;font-family:\'Roboto Condensed\',sans-serif;font-size:.92rem;background:var(--gray-light);"';
-  return '<div class="pos-row" data-idx="'+idx+'" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:end;margin-bottom:8px;">'
-    +'<div class="form-group" style="margin:0"><label '+lbl+'>Position</label>'+posSelect(prefix,idx,data.pos||'')+'</div>'
-    +'<div class="form-group" style="margin:0"><label '+lbl+'>Innings</label><input type="number" class="pos-inn" data-idx="'+idx+'" min="0" value="'+inn+'" '+inp+'></div>'
-    +'<div class="form-group" style="margin:0"><label '+lbl+'>PO</label><input type="number" class="pos-po" data-idx="'+idx+'" min="0" value="'+po+'" '+inp+'></div>'
-    +'<div class="form-group" style="margin:0"><label '+lbl+'>A</label><input type="number" class="pos-a" data-idx="'+idx+'" min="0" value="'+a+'" '+inp+'></div>'
-    +'</div>';
-}
-
-window.buildPositionRows = function(containerId, prefix, existing){
-  existing = existing||[];
-  const wrap = document.getElementById(containerId);
-  if(!wrap) return;
-  const data = existing.length ? existing.concat([{}]) : [{}];
-  wrap.innerHTML = data.map((r,i)=>posRowHTML(prefix,i,r)).join('');
-}
-
-window.onPosChange = function(prefix, idx){
-  const wrap = document.getElementById(prefix+'-positions-wrap');
-  if(!wrap) return;
-  const rows = wrap.querySelectorAll('.pos-row');
-  const lastSel = wrap.querySelector('.pos-sel[data-idx="'+(rows.length-1)+'"]');
-  if(lastSel && lastSel.value !== ''){
-    const div = document.createElement('div');
-    div.innerHTML = posRowHTML(prefix, rows.length, {});
-    wrap.appendChild(div.firstElementChild);
-  }
-}
-
-window.collectPositions = function(prefix){
-  const wrap = document.getElementById(prefix+'-positions-wrap');
-  if(!wrap) return [];
-  const result = [];
-  wrap.querySelectorAll('.pos-row').forEach(row=>{
-    const pos = row.querySelector('.pos-sel').value;
-    if(!pos) return;
-    result.push({
-      pos,
-      inn: +row.querySelector('.pos-inn').value||0,
-      po:  +row.querySelector('.pos-po').value||0,
-      a:   +row.querySelector('.pos-a').value||0
-    });
-  });
-  return result;
-}
-
-// ── INIT ─────────────────────────────────────────────────────────────────────
 document.getElementById('gr-date').value=today();
-buildPositionRows('ps-positions-wrap','ps');
 </script>
 </body>
 </html>
