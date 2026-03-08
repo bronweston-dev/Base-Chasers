@@ -446,11 +446,7 @@
       </div>
 
       <div class="form-divider">🧤 Fielding Stats</div>
-      <div class="form-row">
-        <div class="form-group"><label>Position</label><input type="text" id="ps-pos" placeholder="e.g. SS, P, CF"></div>
-        <div class="form-group"><label>PO (Put Outs)</label><input type="number" id="ps-po" min="0" value="0"></div>
-        <div class="form-group"><label>A (Assists)</label><input type="number" id="ps-a" min="0" value="0"></div>
-      </div>
+      <div id="ps-positions-wrap"></div>
 
       <div class="form-divider">⚾ Pitching Stats <span style="font-size:.75rem;font-weight:400;color:#888;">(enter 0 IP if did not pitch)</span></div>
       <div class="form-row">
@@ -592,11 +588,7 @@
         <div class="form-group"><label>SB</label><input type="number" id="ep-sb" min="0"></div>
       </div>
       <div class="form-divider">🧤 Fielding</div>
-      <div class="form-row">
-        <div class="form-group"><label>Position</label><input type="text" id="ep-pos"></div>
-        <div class="form-group"><label>PO</label><input type="number" id="ep-po" min="0"></div>
-        <div class="form-group"><label>A</label><input type="number" id="ep-a" min="0"></div>
-      </div>
+      <div id="ep-positions-wrap"></div>
       <div class="form-divider">⚾ Pitching</div>
       <div class="form-row">
         <div class="form-group"><label>IP</label><input type="number" id="ep-ip" min="0" step="0.1"></div>
@@ -1107,9 +1099,10 @@ window.addPlayerStats = async function(){
     so:+document.getElementById('ps-so').value||0,
     sb:+document.getElementById('ps-sb').value||0,
     // fielding
-    pos:document.getElementById('ps-pos').value||'—',
-    po:+document.getElementById('ps-po').value||0,
-    a: +document.getElementById('ps-a').value||0,
+    positions: (()=>{ const p=collectPositions('ps'); window._psPos=p; return p; })(),
+    pos: (window._psPos||[]).map(r=>r.pos).filter(Boolean).join('/') || '—',
+    po:  (window._psPos||[]).reduce((s,r)=>s+r.po,0),
+    a:   (window._psPos||[]).reduce((s,r)=>s+r.a,0),
     // pitching
     ip: +document.getElementById('ps-ip').value||0,
     er: +document.getElementById('ps-er').value||0,
@@ -1121,8 +1114,8 @@ window.addPlayerStats = async function(){
   try{
     await addDoc(collection(db,'player_stats'), rec);
     document.getElementById('ps-batorder').value=1;
-    ['ps-pos'].forEach(id=>document.getElementById(id).value='');
-    ['ps-ab','ps-r','ps-h','ps-2b','ps-3b','ps-hr','ps-rbi','ps-bb','ps-so','ps-sb','ps-po','ps-a','ps-ip','ps-er','ps-ph','ps-pbb','ps-pk'].forEach(id=>document.getElementById(id).value=0);
+    buildPositionRows('ps-positions-wrap','ps');
+    ['ps-ab','ps-r','ps-h','ps-2b','ps-3b','ps-hr','ps-rbi','ps-bb','ps-so','ps-sb','ps-ip','ps-er','ps-ph','ps-pbb','ps-pk'].forEach(id=>document.getElementById(id).value=0);
     document.getElementById('ps-player').value='';
     document.getElementById('ps-gamenum').value='';
     document.getElementById('ps-date').value='';
@@ -1206,8 +1199,7 @@ window.openEditPlayer = function(docId){
   document.getElementById('ep-rbi').value = g.rbi; document.getElementById('ep-bb').value  = g.bb;
   document.getElementById('ep-so').value  = g.so;  document.getElementById('ep-sb').value  = g.sb;
   document.getElementById('ep-batorder').value = g.batOrder||1;
-  document.getElementById('ep-pos').value = g.pos||'';
-  document.getElementById('ep-po').value  = g.po;  document.getElementById('ep-a').value   = g.a;
+  buildPositionRows('ep-positions-wrap','ep', g.positions||[{pos:g.pos||'',inn:0,po:g.po||0,a:g.a||0}]);
   document.getElementById('ep-ip').value  = g.ip;  document.getElementById('ep-er').value  = g.er;
   document.getElementById('ep-ph').value  = g.ph;  document.getElementById('ep-pbb').value = g.pbb;
   document.getElementById('ep-pk').value  = g.pk;
@@ -1226,8 +1218,10 @@ window.saveEditPlayer = async function(){
     t: +document.getElementById('ep-3b').value||0,  hr:+document.getElementById('ep-hr').value||0,
     rbi:+document.getElementById('ep-rbi').value||0,bb:+document.getElementById('ep-bb').value||0,
     so:+document.getElementById('ep-so').value||0,  sb:+document.getElementById('ep-sb').value||0,
-    pos:document.getElementById('ep-pos').value||'—',
-    po:+document.getElementById('ep-po').value||0,  a:+document.getElementById('ep-a').value||0,
+    positions: (()=>{ const p=collectPositions('ep'); window._epPos=p; return p; })(),
+    pos: (window._epPos||[]).map(r=>r.pos).filter(Boolean).join('/') || '—',
+    po:  (window._epPos||[]).reduce((s,r)=>s+r.po,0),
+    a:   (window._epPos||[]).reduce((s,r)=>s+r.a,0),
     ip:+document.getElementById('ep-ip').value||0,  er:+document.getElementById('ep-er').value||0,
     ph:+document.getElementById('ep-ph').value||0,  pbb:+document.getElementById('ep-pbb').value||0,
     pk:+document.getElementById('ep-pk').value||0,
@@ -1354,8 +1348,83 @@ window.switchModalTab=function(name){
 }
 window.togglePanel=function(h){h.classList.toggle('collapsed');h.nextElementSibling.classList.toggle('hidden');}
 
+// ── FIELDING POSITION ROWS ────────────────────────────────────────────────
+const POSITIONS = ['','P','C','1B','2B','3B','SS','LF','CF','Rover','RF'];
+
+function makePosRow(prefix, existing){
+  existing = existing||{};
+  const row = document.createElement('div');
+  row.className = 'pos-row';
+  row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:end;margin-bottom:8px;';
+
+  const iStyle = 'width:100%;padding:6px 8px;border:2px solid var(--gray);border-radius:6px;font-family:Roboto Condensed,sans-serif;font-size:.9rem;background:var(--gray-light);';
+  const lStyle = 'font-size:.72rem;font-weight:700;letter-spacing:1.5px;color:var(--blue);display:block;margin-bottom:3px;text-transform:uppercase;';
+
+  // Position select
+  const selWrap = document.createElement('div');
+  const selLbl = document.createElement('label');
+  selLbl.style.cssText = lStyle; selLbl.textContent = 'Position';
+  const sel = document.createElement('select');
+  sel.style.cssText = iStyle;
+  POSITIONS.forEach(p=>{ const o=document.createElement('option'); o.value=p; o.textContent=p||'-- Pos --'; if(p===(existing.pos||'')) o.selected=true; sel.appendChild(o); });
+  sel.onchange = function(){ onPosChange(prefix, row); };
+  selWrap.appendChild(selLbl); selWrap.appendChild(sel); row.appendChild(selWrap);
+
+  // Inn, PO, A inputs
+  [['Inn','pos-inn',existing.inn||0],['PO','pos-po',existing.po||0],['A','pos-a',existing.a||0]].forEach(([label,cls,val])=>{
+    const wrap = document.createElement('div');
+    const lbl = document.createElement('label');
+    lbl.style.cssText = lStyle; lbl.textContent = label;
+    const inp = document.createElement('input');
+    inp.type='number'; inp.min='0'; inp.value=val; inp.className=cls; inp.style.cssText=iStyle;
+    wrap.appendChild(lbl); wrap.appendChild(inp); row.appendChild(wrap);
+  });
+
+  return row;
+}
+
+window.buildPositionRows = function(containerId, prefix, existing){
+  existing = existing||[];
+  const wrap = document.getElementById(containerId);
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  const rows = existing.length ? [...existing, {}] : [{}];
+  rows.forEach(r=>wrap.appendChild(makePosRow(prefix, r)));
+}
+
+window.onPosChange = function(prefix, changedRow){
+  const wrap = document.getElementById(prefix+'-positions-wrap');
+  if(!wrap) return;
+  const rows = wrap.querySelectorAll('.pos-row');
+  const lastRow = rows[rows.length-1];
+  const lastSel = lastRow ? lastRow.querySelector('select') : null;
+  if(lastSel && lastSel.value !== ''){
+    wrap.appendChild(makePosRow(prefix, {}));
+  }
+}
+
+window.collectPositions = function(prefix){
+  const wrap = document.getElementById(prefix+'-positions-wrap');
+  if(!wrap) return [];
+  const result = [];
+  wrap.querySelectorAll('.pos-row').forEach(row=>{
+    const pos = row.querySelector('select').value;
+    if(!pos) return;
+    result.push({
+      pos,
+      inn: +row.querySelector('.pos-inn').value||0,
+      po:  +row.querySelector('.pos-po').value||0,
+      a:   +row.querySelector('.pos-a').value||0
+    });
+  });
+  return result;
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────
 document.getElementById('gr-date').value=today();
+buildPositionRows('ps-positions-wrap','ps');
+
+
 </script>
 </body>
 </html>
